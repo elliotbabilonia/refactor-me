@@ -1,108 +1,46 @@
 import pandas as pd
 
-# Read in a data file
+# Function to calculate and print summary statistics for a column
+def print_summary_statistics(data, column_name):
+    column = data[column_name]
+    print(f"Summary statistics on {column_name}")
+    print("Mean:", column.mean())
+    print("Median:", column.median())
+    print("Max:", column.max())
+    print("Min:", column.min())
+    print("Standard Dev:", column.std())
+    print()
+
+# Function to filter and calculate summary statistics for a specific season
+def print_season_summary(data, season_name, column_name):
+    season_data = data[data['Season'] == season_name]
+    print_summary_statistics(season_data, column_name)
+
+# Function to find the most popular payment method in a location
+def find_most_popular_payment_method(data, location):
+    location_data = data[data['Location'] == location]
+    popular_method = location_data['Payment Method'].mode()
+    if not popular_method.empty:
+        print(f"Most popular payment method in {location}: {popular_method.iloc[0]}")
+    else:
+        print(f"No payment method data available for {location}")
+    print()
+
+# Read in the data file
 df = pd.read_csv('data/raw/shopping_behavior_updated.csv')
 
-# calculate summary statistics on the Purchase Amount column
-# TODO: Is there a way to encapsulate all this functionality
-# TODO: in one function call?
-s1 = df['Purchase Amount (USD)'].mean()
-s2 = df['Purchase Amount (USD)'].median()
-s3 = df['Purchase Amount (USD)'].max()
-s4 = df['Purchase Amount (USD)'].min()
-s5 = df['Purchase Amount (USD)'].std()
+# Calculate and print summary statistics for Purchase Amount and Age columns
+columns_to_analyze = ["Purchase Amount (USD)", "Age"]
+for column in columns_to_analyze:
+    print_summary_statistics(df, column)
 
-print("Summary statistics on Purchase Amount (USD)")
-print("Mean", s1)
-print("Median", s2)
-print("Max", s3)
-print("Min", s4)
-print("Standard Dev", s5)
-print()
+# Print summary statistics for different seasons
+seasons_to_analyze = ["Winter", "Summer", "Spring", "Fall"]
+for season in seasons_to_analyze:
+    print_season_summary(df, season, "Purchase Amount (USD)")
 
-# calculate summary statistics on the Age column
-# TODO: Is there a way to encapsulate all this functionality
-# TODO: in one function call?
-s1 = df['Age'].mean()
-s2 = df['Age'].median()
-s3 = df['Age'].max()
-s4 = df['Age'].min()
-s5 = df['Age'].std()
-
-print("Summary statistics on Age")
-print("Mean", s1)
-print("Median", s2)
-print("Max", s3)
-print("Min", s4)
-print("Standard Dev", s5)
-print()
-
-# summary statistics
-# TODO: is there another function we can use to calculate metrics on groups?
-winter = df[df.Season == "Winter"]
-summer = df[df.Season == "Summer"]
-spring = df[df.Season == "Spring"]
-fall = df[df.Season == "Fall"]
-
-s1 = winter['Purchase Amount (USD)'].mean()
-s2 = winter['Purchase Amount (USD)'].median()
-s3 = winter['Purchase Amount (USD)'].max()
-s4 = winter['Purchase Amount (USD)'].min()
-s5 = winter['Purchase Amount (USD)'].std()
-
-print("Winter summary statistics on Purchase Amount (USD)")
-print("Mean", s1)
-print("Median", s2)
-print("Max", s3)
-print("Min", s4)
-print("Standard Dev", s5)
-print()
-
-s1 = summer['Purchase Amount (USD)'].mean()
-s2 = summer['Purchase Amount (USD)'].median()
-s3 = summer['Purchase Amount (USD)'].max()
-s4 = summer['Purchase Amount (USD)'].min()
-s5 = summer['Purchase Amount (USD)'].std()
-
-print("Summer summary statistics on Purchase Amount (USD)")
-print("Mean", s1)
-print("Median", s2)
-print("Max", s3)
-print("Min", s4)
-print("Standard Dev", s5)
-print()
-
-s1 = spring['Purchase Amount (USD)'].mean()
-s2 = spring['Purchase Amount (USD)'].median()
-s3 = spring['Purchase Amount (USD)'].max()
-s4 = spring['Purchase Amount (USD)'].min()
-s5 = spring['Purchase Amount (USD)'].std()
-
-print("Spring summary statistics on Purchase Amount (USD)")
-print("Mean", s1)
-print("Median", s2)
-print("Max", s3)
-print("Min", s4)
-print("Standard Dev", s5)
-print()
-
-s1 = fall['Purchase Amount (USD)'].mean()
-s2 = fall['Purchase Amount (USD)'].median()
-s3 = fall['Purchase Amount (USD)'].max()
-s4 = fall['Purchase Amount (USD)'].min()
-s5 = fall['Purchase Amount (USD)'].std()
-
-print("Fall summary statistics on Purchase Amount (USD)")
-print("Mean", s1)
-print("Median", s2)
-print("Max", s3)
-print("Min", s4)
-print("Standard Dev", s5)
-print()
-
-# keep all columns except for "Customer", & "Discount Applied"
-# TODO: is there a more efficient way to exclude columns in your dataset?
-df = df[[
+# Keeping the selected columns in the file
+columns_to_keep = [
     "Customer ID",
     "Age",
     "Gender",
@@ -120,21 +58,11 @@ df = df[[
     "Previous Purchases",
     "Payment Method",
     "Frequency of Purchases"
-]]
+]
+df = df[columns_to_keep]
 
-# figure out most popular payment method in NY
-# TODO: is there anyway we could modularize this behavior to apply to all
-# TODO: possible states? (OR possibly use a pandas function that does this
-# TODO: for us already?)
-payment_methods = df['Payment Method'].unique()
-ny = df[df.Location == "New York"]
+# Finding the most popular payment method in New York
+find_most_popular_payment_method(df, "New York")
 
-most_frequent_method = {}
-
-for method in payment_methods:
-    most_frequent_method[method] = len(ny[ny['Payment Method'] == method])
-
-print(most_frequent_method)
-
-# Write this updated data out to csv file
+# Inputting the updated data into the csv file
 df.to_csv('data/processed/cleaned_data.csv', index=False)
